@@ -7,15 +7,15 @@
 #define ull unsigned long long
 using namespace std;
 
-const i64 mod=1e9+7;
+constexpr i64 mod=998244353;
 
 
 int main()
 {
 	ios::sync_with_stdio(false);
     cin.tie(0),cout.tie(0);
-    cout<<fixed<<setprecision(10);
+    cout<<fixed<<setprecision(15);
+
     
-    
-    return 0;
+    return 0; 
 }
