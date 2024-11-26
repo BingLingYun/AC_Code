@@ -5,7 +5,6 @@
 #define pll pair<i64,i64>
 #define int128 __int128_t
 #define ull unsigned long long
-#define all(x) x.begin(),x.end()
 using namespace std;
 
 constexpr i64 mod=998244353;
