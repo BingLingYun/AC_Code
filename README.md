@@ -1,3 +1,7 @@
+我的Codeforces账号
 [![](https://cfrating.ihcr.top/?user=Lihg)](https://codeforces.com/profile/Lihg)
+我的Atcoder账号
+[![](https://atrating.baoshuo.dev/rating?username=Lihg)](https://atcoder.jp/users/Lihg)
 # AC_Code
-计划是将写过的XCPC区域赛的题目的代码进行留存
+将写过的XCPC区域赛的题目的代码进行留存
+将Lihg的小板子进行记录
