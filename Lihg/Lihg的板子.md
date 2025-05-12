@@ -1,4 +1,6 @@
-# Lihg的板子
+# Lihg模板
+
+[TOC]
 
 ## 小技巧
 
@@ -9,10 +11,10 @@ __builtin_popcount()//求二进制中‘1’的个数
 
 mt19937_64 rng(chrono::steady_clock::now().time_since_epoch().count());//生成64位的随机数
 
-f(n)=C(2*n,n)/(n+1)//卡特兰数的通项，合法的括号匹配序列的个数
-
 d(A,B)=max(|x1-x2|,|y1-y2|)=|(x1+y1)/2-(x2+y2)/2|+|(x1-y1)/2-(x2-y2)/2|//切比雪夫距离转曼哈顿
 ```
+
+## 封装模板
 
 ### 取模板子
 
@@ -570,7 +572,7 @@ int main()
 
 ## 数论
 
-#### 欧几里得算法
+### 欧几里得算法
 
 ```c++
 i64 exgcd(i64 a,i64 b,i64 &x,i64 &y)//扩展欧几里得算法
@@ -601,31 +603,25 @@ i64 cal(i64 a,i64 b,i64 c)//计算最小正整数解
 }
 ```
 
-#### 线性筛
+### 线性筛
 
 ```c++
-int st[maxn],phi[maxn];
-vector<int>prime;
-//筛质数和求欧拉函数
-void getPrime(int n) 
+// 线性筛质数
+int st[maxn];
+vector<int> prime;
+void getPrime(int n)
 {
-    phi[1]=1;
-    for (int i = 2; i <= n; i++) 
+    for (int i = 2; i <= n; i++)
     {
-        if (!st[i]) 
+        if (!st[i])
         {
             prime.push_back(i);
-            phi[i] = i - 1;
         }
-        for (auto j : prime) 
+        for (auto j : prime)
         {
-            if (i * j > n) break;
+            if (i * j > n)
+                break;
             st[i * j] = 1;
-            if (i % j == 0) 
-            {
-                phi[i * j] = phi[i] * j;break;
-            }
-            phi[i * j] = phi[i] * phi[j];
         }
     }
 }
@@ -735,7 +731,7 @@ vector<i64> getfac(i64 x)
 }
 ```
 
-#### 整除分块
+### 整除分块
 
 求$$ sum = \sum n/i$$，1-n
 
@@ -749,7 +745,7 @@ for(int l=1;l<=n;l++)
 }
 ```
 
-#### long long 取模
+### long long 取模
 
 ```c++
 i64 get(i64 x,i64 y,i64 m)
@@ -762,6 +758,12 @@ i64 get(i64 x,i64 y,i64 m)
     return d;
 }
 ```
+
+### 卡特兰数
+
+![image-20250218172145779](C:\Users\GLH\AppData\Roaming\Typora\typora-user-images\image-20250218172145779.png)
+
+![image-20250218172219076](C:\Users\GLH\AppData\Roaming\Typora\typora-user-images\image-20250218172219076.png)
 
 ### 矩阵快速幂
 
@@ -821,20 +823,9 @@ inline mul fpow(mul base,i64 k)
 }//快速幂
 ```
 
-#### 组合数
+### 组合数
 
 ```c++
-const i64 mod=1e9+7;
-
-vector<i64>fac(n+1,0),inv(n+1,0);
-fac[0]=1; for(int i=1;i<=n;i++) fac[i]=fac[i-1]*i%mod;//阶乘
-inv[n]=fpow(fac[n],mod-2); for(int i=n-1;i>=0;i--) inv[i]=inv[i+1]*(i+1)%mod;//逆元
-auto C = [&] (i64 x,i64 y)
-{
-    if(x<y) return 0ll;
-    return fac[x]*inv[y]%mod*inv[x-y]%mod;
-};//C(x,y)
-
 i64 fpow(i64 x,i64 y)
 {
     i64 ans=1;
@@ -847,13 +838,18 @@ i64 fpow(i64 x,i64 y)
 }
 struct Combi{
     vector<i64>fac,inv;int n;
-    Combi(int m)
+    Combi(){}
+    Combi(int n)
     {
-        fac=vector<i64>(m+1);
-        inv=vector<i64>(m+1);
-        n=m;
+        init(n);
     }
-    void init()
+    void init(int n)
+    {
+        this->n=n;
+        fac.resize(n+1,0);
+        inv.resize(n+1,0);
+    }
+    void init_C()
     {
         fac[0]=1;
         for(int i=1;i<=n;i++) fac[i]=fac[i-1]*i%mod;
@@ -868,7 +864,7 @@ struct Combi{
 };
 ```
 
-#### Lucas定理
+### Lucas定理
 
 ![image-20240428145833213](C:\Users\GLH\AppData\Roaming\Typora\typora-user-images\image-20240428145833213.png)
 
@@ -889,7 +885,83 @@ function<i64(int,int)> lucas = [&] (int x,int y)
 };
 ```
 
-## 基本数据结构/算法
+
+
+### 欧拉函数
+
+------
+
+$\sum_{d|n} \phi(d) = n$
+
+```c++
+int st[maxn], phi[maxn];
+vector<int> prime;
+void getPrime(int n)
+{
+    phi[1] = 1;
+    for (int i = 2; i <= n; i++)
+    {
+        if (!st[i])
+        {
+            prime.push_back(i);
+            phi[i] = i - 1;
+        }
+        for (auto j : prime)
+        {
+            if (i * j > n)
+                break;
+            st[i * j] = 1;
+            if (i % j == 0)
+            {
+                phi[i * j] = phi[i] * j;
+                break;
+            }
+            phi[i * j] = phi[i] * phi[j];
+        }
+    }
+}
+```
+
+
+
+### CRT
+
+------
+
+<img src="C:\Users\GLH\AppData\Roaming\Typora\typora-user-images\image-20250429185132818.png" alt="image-20250429185132818" style="zoom: 50%;" /><img src="C:\Users\GLH\AppData\Roaming\Typora\typora-user-images\image-20250429191218340.png" alt="image-20250429191218340" style="zoom:50%;" />
+
+```c++
+i64 exgcd(i64 a,i64 b,i64 &x,i64 &y)//扩展欧几里得算法
+{
+    if(!b)
+    {
+        x=1,y=0;
+        return a;
+    }
+    i64 xx,yy;
+    i64 Gcd=exgcd(b,a%b,xx,yy);
+    x=yy;
+    y=xx-(a/b)*yy;
+    return Gcd;
+}
+i64 CRT(int n,vector<i64>mo,vector<i64>yu)
+{
+    i64 M=1,ans=0;
+    for(int i=1;i<=n;i++) M=M*mo[i];
+    for(int i=1;i<=n;i++)
+    {
+        i64 Mi=M/mo[i],inv,y;
+        exgcd(Mi,mo[i],inv,y);
+        inv = inv % mo[i];
+        ans= (ans+yu[i]*Mi*inv)%M;
+    }
+    return (ans+M)%M;
+}
+```
+
+
+
+## 基础数据结构/算法思想
 
 ### 单调栈
 
@@ -903,6 +975,8 @@ for(int i=1;i<=n;i++)
 }//在右侧找到第一个大于当前值的下标
 ```
 
+
+
 ### ST表
 
 ```c++
@@ -911,10 +985,15 @@ for(int i=1;i<=n;i++)
 struct ST{
     vector<vector<int>>f;
     int n;
-    ST(int N)
+    ST(){}
+    ST(int n)
     {
-        f=vector<vector<int>>(N+10,vector<int>(32,0));
-        n=N;
+        init(n);
+    }
+    void init(int n)
+    {
+        this->n=n;
+        f.resize(n+1,vector<int>(31,0));
     }
     int quiry(int l,int r)
     {
@@ -1032,6 +1111,8 @@ struct RMQ_2D{
 };
 ```
 
+
+
 ### Trie
 
 ```c++
@@ -1071,7 +1152,9 @@ struct Trie{
 };
 ```
 
-### 并查集
+
+
+### DSU
 
 ```c++
 struct DSU{
@@ -1143,15 +1226,20 @@ struct unionfind{
 
 ```c++
 struct BIT{
-    vector<int>a;int M;
-    BIT (int N)
+    vector<int>a;int n;
+    BIT(){}
+    BIT (int n)
     {
-        a=vector<int>(N+10,0);
-    	M=N+5;
+        this->n=n;
+        init(n);
+    }
+    void init(int n)
+    {
+        a.resize(n+1,0);
     }
     void add(int x,int v)
     {
-        for(int i=x;i<=M;i+=(i&(-i))) a[i]+=v;
+        for(int i=x;i<=n;i+=(i&(-i))) a[i]+=v;
     }
     int ask(int x)
     {
@@ -1165,10 +1253,10 @@ struct BIT{
     }
     int query(i64 x)//查询1...pos的和小于x的最大值
     {
-        i64 h=ceil(log2(M)),pos=0,t=0;
+        i64 h=ceil(log2(n)),pos=0,t=0;
         for(int j=h;j>=0;j--)//从大到小
         {
-            if(pos + (1<<j) <=M && t + a[pos+(1<<j)] <= x)
+            if(pos + (1<<j) <=n && t + a[pos+(1<<j)] <= x)
             {
                 pos+=(1<<j);
                 t+=a[pos];
@@ -1177,7 +1265,6 @@ struct BIT{
         return pos;
     }
 };
-BIT bit(n);
 
 //单点修改+区间最值
 struct BIT{
@@ -1228,7 +1315,15 @@ struct BIT{
 };
 ```
 
+
+
 ### 线段树
+
+------
+
+#### 基础线段树
+
+------
 
 ```c++
 //区间加减+求区间最值
@@ -1245,8 +1340,12 @@ struct SegmentTree{
     vector<Info>info;
     SegmentTree(int n)
     {
-        info=vector<Info>(n<<2);
+        init(n);
 	}
+    void init(int n)
+    {
+        info.resize(n<<2);
+    }
     void pushup(int u)
     {
         info[u]=info[u<<1]+info[u<<1|1];
@@ -1366,7 +1465,15 @@ struct SegmentTree{
         return quiry(u<<1,l,mid,x,y)+quiry(u<<1|1,mid+1,r,x,y);
     }
 };
+```
 
+
+
+#### 树套树
+
+------
+
+```c++
 //树套数求二维区间最值
 void cmx(int &a,int b) { a=max(a,b); }
 void cmn(int &a,int b) { a=min(a,b); }
@@ -1518,122 +1625,67 @@ struct tree_x{
 };
 ```
 
-### 压位高精
+
+
+#### 可持久化线段树
+
+------
 
 ```c++
-const int power = 4;      //每次运算的位数为10的power次方，在这里定义为了方便程序实现  
-const int base = 10000;      //10的power次方。  
-
-
-//要压位的时候，只需改power 和 base即可，如压万位高精，那么power = 4, base = 10000  
-
-const int MAXL = 10001;    //数组的长度。  
-
-
-char a[MAXL], b[MAXL], aa[MAXL];  
-struct num  
-{  
-    int a[MAXL];  
-    num() { memset(a, 0, sizeof(a)); }                      //初始化  
-    num(string s)                                            //将一个字符串初始化为高精度数  
-    {  
-        memset(a, 0, sizeof(a));  
-        int len = s.size();  
-        a[0] = (len+power-1) / power;                       //数的长度  
-        for (int i=0, t=0, w; i < len ;w *= 10, ++i)          
-        {  
-            if (i % power == 0) { w = 1, ++t; }  
-            a[t] += w * (s[i]-'0');  
-        }  
-        //初始化数组，这里自己模拟一下，应该很容易懂的~  
+//权值线段树，通过前缀和得到区间的线段树的值，再在权值上进行操作求值
+//求区间第k小的值
+struct Segtree
+{
+    vector<int> sum, rt, ls, rs;
+    int tot = 0;
+    Segtree() {}
+    Segtree(int n)
+    {
+        init(n);
     }
-    void add(int k) { if (k || a[0]) a[ ++a[0] ] = k; }     //在末尾添加一个数，除法的时候要用到  
-    void re() { reverse(a+1, a+a[0]+1); }                   //把数反过来，除法的时候要用到  
-    void print()                                            //打印此高精度数  
-    {  
-        printf("%d", a[ a[0] ]);        
-        //先打印最高位，为了压位 或者 该高精度数为0 考虑  
-        for (int i = a[0]-1;i > 0;--i)  
-        printf("%0*d", power, a[i]);    
-        //这里"%0*d", power的意思是，必须输出power位，不够则前面用0补足  
-        printf("\n");  
-    }  
-} p,q,ans,r;  
-
-
-bool operator < (const num &p, const num &q)              //判断小于关系，除法的时候有用  
-{  
-    if (p.a[0] < q.a[0]) return true;  
-    if (p.a[0] > q.a[0]) return false;  
-    for (int i = p.a[0];i > 0;--i)  
-    {  
-        if (p.a[i] != q.a[i]) return p.a[i] < q.a[i];  
-    }  
-    return false;  
-}  
-
-
-num operator + (const num &p, const num &q)               //加法，不用多说了吧，模拟一遍，很容易懂  
-{  
-    num c;  
-    c.a[0] = max(p.a[0], q.a[0]);  
-    for (int i = 1;i <= c.a[0];++i)  
-    {  
-        c.a[i] += p.a[i] + q.a[i];  
-        c.a[i+1] += c.a[i] / base;  
-        c.a[i] %= base;  
-    }  
-    if (c.a[ c.a[0]+1 ]) ++c.a[0];  
-    return c;  
-}  
-
-
-num operator - (const num &p, const num &q)               //减法，也不用多说，模拟一遍，很容易懂  
-{  
-    num c = p;  
-    for (int i = 1;i <= c.a[0];++i)  
-    {  
-        c.a[i] -= q.a[i];  
-        if (c.a[i] < 0) { c.a[i] += base; --c.a[i+1]; }  
-    }  
-    while (c.a[0] > 0 && !c.a[ c.a[0] ]) --c.a[0];            
-    //我的习惯是如果该数为0，那么他的长度也是0，方便比较大小和在末尾添加数时的判断。  
-    return c;  
-}  
-
-
-num operator * (const num &p, const num &q)                   
-//乘法，还是模拟一遍。。其实高精度就是模拟人工四则运算！  
-{  
-    num c;  
-    c.a[0] = p.a[0]+q.a[0]-1;  
-    for (int i = 1;i <= p.a[0];++i)  
-    for (int j = 1;j <= q.a[0];++j)  
-    {  
-        c.a[i+j-1] += p.a[i]*q.a[j];  
-        c.a[i+j] += c.a[i+j-1] / base;  
-        c.a[i+j-1] %= base;  
-    }  
-    if (c.a[ c.a[0]+1 ]) ++c.a[0];  
-    return c;  
-}  
-
-
-num operator / (const num &p, const num &q)               //除法，这里我稍微讲解一下  
-{  
-    num x, y;  
-    for (int i = p.a[0];i >= 1;--i)                       //从最高位开始取数  
-    {  
-        y.add(p.a[i]);             //把数添到末尾（最低位），这时候是高位在前，低位在后  
-        y.re();                    //把数反过来，变为统一的存储方式：低位在前，高位在后  
-        while ( !(y < q) )         //大于等于除数的时候，如果小于的话，其实答案上的该位就是初始的“0”  
-            y = y - q, ++x.a[i];   //看能减几个除数，减几次，答案上该位就加几次。  
-        y.re();                    //将数反过来，为下一次添数做准备  
-    }  
-    x.a[0] = p.a[0];  
-    while (x.a[0] > 0 && !x.a[x.a[0]]) --x.a[0];  
-    return x;  
-}
+    void init(int n)
+    {
+        int maxn = (n << 5) + 10;
+        sum.resize(maxn);
+        rt.resize(maxn);
+        ls.resize(maxn);
+        rs.resize(maxn);
+    }
+    int build(int l, int r) // 建树
+    {
+        int root = ++tot;
+        if (l == r)
+            return root;
+        int mid = l + r >> 1;
+        ls[root] = build(l, mid);
+        rs[root] = build(mid + 1, r);
+        return root; // 返回该子树的根节点
+    }
+    int update(int k, int l, int r, int root) // 插入操作
+    {
+        int dir = ++tot;
+        ls[dir] = ls[root], rs[dir] = rs[root], sum[dir] = sum[root] + 1;
+        if (l == r)
+            return dir;
+        int mid = l + r >> 1;
+        if (k <= mid)
+            ls[dir] = update(k, l, mid, ls[dir]);
+        else
+            rs[dir] = update(k, mid + 1, r, rs[dir]);
+        return dir;
+    }
+    int query(int u, int v, int l, int r, int k)// 查询操作
+    { 
+        int mid = l + r >> 1,
+            x = sum[ls[v]] - sum[ls[u]]; // 通过区间减法得到左儿子中所存储的数值个数
+        if (l == r)
+            return l;
+        if (k <= x) // 若 k 小于等于 x ，则说明第 k 小的数字存储在在左儿子中
+            return query(ls[u], ls[v], l, mid, k);
+        else // 否则说明在右儿子中
+            return query(rs[u], rs[v], mid + 1, r, k - x);
+    }
+};
 ```
 
 
@@ -1676,7 +1728,102 @@ void erase(int x)
 }
 ```
 
-### 线性基（处理异或和）
+
+
+## 数据结构
+
+### 笛卡尔树
+
+------
+
+![image-20250503003959084](C:\Users\GLH\AppData\Roaming\Typora\typora-user-images\image-20250503003959084.png)
+
+
+
+O($n$)复杂度利用单调栈
+
+```c++
+//小根
+vector<int>stk(n+1),ls(n+1),rs(n+1),w(n+1);
+for (int i = 1; i <= n; i++) 
+{
+    int k = top;  // top 表示操作前的栈顶，k 表示当前栈顶
+    while (k > 0 && w[stk[k]] > w[i]) k--;  // 维护右链上的节点
+    if (k) rs[stk[k]] = i;  // 栈顶元素.右儿子 := 当前元素
+    if (k < top) ls[i] = stk[k + 1];  // 当前元素.左儿子 := 上一个被弹出的元素
+    stk[++k] = i;                     // 当前元素入栈
+    top = k;
+}
+```
+
+
+
+O($nlog_n$)复杂度利用ST表和分治
+
+```c++
+//大根
+struct ST{
+    vector<vector<pii>>f;
+    int n;
+    ST(){}
+    ST(int n)
+    {
+        init(n);
+    }
+    void init(int n)
+    {
+        this->n=n;
+        f.resize(n+1,vector<pii>(31));
+    }
+    pii quiry(int l,int r)
+    {
+        int ln=(int)(log(r-l+1)/log(2));
+        if(f[l][ln].first < f[r-(1<<ln)+1][ln].first) return f[r-(1<<ln)+1][ln];
+        else return f[l][ln];
+    }
+    void build(vector<int>a)
+    {
+        for(int i=1;i<=n;i++)
+        {
+            f[i][0].first=a[i];
+            f[i][0].second=i;
+        }
+        int len=(int)(log(n)/log(2));
+        for(int j=1;j<=len;j++)
+        {
+            for(int i=1;i<=n-(1<<j)+1;i++)
+            {
+                if(f[i][j-1].first < f[i+(1<<(j-1))][j-1].first) f[i][j]=f[i+(1<<(j-1))][j-1];
+                else f[i][j]=f[i][j-1];
+            }
+        }
+    }
+};
+int main()
+{
+    int n;cin>>n;
+    vector<int>a(n+1);
+    for(int i=1;i<=n;i++) cin>>a[i];
+    ST rmq(n);rmq.build(a);
+    vector<vector<int>>g(n+1);
+    function<int(int,int)> build = [&] (int l,int r)
+    {
+        if(l==r) return l;
+        auto val=rmq.quiry(l,r);
+        int pos=val.second;
+        if(pos>l) g[pos].push_back(build(l,pos-1));
+        if(pos<r) g[pos].push_back(build(pos+1,r));
+        return pos;
+    };
+    int root = build(1,n);
+}
+```
+
+
+
+### 线性基
+
+------
 
 **用处**
 
@@ -1761,42 +1908,15 @@ struct Linear_basis
 };
 ```
 
-### 后缀数组
-
-![image-20240920141341707](C:\Users\GLH\AppData\Roaming\Typora\typora-user-images\image-20240920141341707.png)
-
-```c++
-string s;cin>>s;s=" "+s;
-int n=s.size()-1;
-vector<int>sa(n+1),rk(2*n+1),oldrk(n+n+1);
-for (int i = 1;i <= n; ++i) sa[i] = i, rk[i] = s[i];
-for (int w = 1; w < n; w <<= 1) 
-{
-    sort(sa.begin()+1, sa.end(), [&](int x, int y) {
-    	return rk[x] == rk[y] ? rk[x + w] < rk[y + w] : rk[x] < rk[y];});
-    oldrk=rk;
-    // 由于计算 rk 的时候原来的 rk 会被覆盖，要先复制一份
-    for (int p = 0, i = 1; i <= n; ++i) 
-    {
-        if (oldrk[sa[i]] == oldrk[sa[i - 1]] && oldrk[sa[i] + w] == oldrk[sa[i - 1] + w]) 
-        {
-        	rk[sa[i]] = p;
-        } 
-        else 
-        {
-            rk[sa[i]] = ++p;
-        }  // 若两个子串相同，它们对应的 rk 也需要相同，所以要去重
-    }
-}
-```
-
 
 
 ## **图论**
 
 ### 网络流
 
-#### Dinic算法
+------
+
+#### Dinic
 
 ```c++
 //最大流
@@ -1878,7 +1998,9 @@ struct MF
 };
 ```
 
-#### MCMF算法
+
+
+#### MCMF
 
 ```c++
 //最小费用最大流
@@ -1950,7 +2072,7 @@ int mcmf(int s,int t)
     return ans;
 }
 
-//另一种
+//另一种写法
 const i64 N=305,M=50005;
 const i64 LLINF=1e18;
 i64 n,m,s,t,head[N],tot=1;
@@ -2003,8 +2125,117 @@ void Dinic()
 		cost+=res*dis[t];
 	}
 }
+```
 
-//dijkstra
+#### 封装模板
+
+```c++
+//求最大流
+template<class T>
+struct MaxFlow {
+    struct _Edge {
+        int to;
+        T cap;
+        _Edge(int to, T cap) : to(to), cap(cap) {}
+    };
+    int n;
+    std::vector<_Edge> e;
+    std::vector<std::vector<int>> g;
+    std::vector<int> cur, h;
+    MaxFlow() {}
+    MaxFlow(int n) {
+        init(n);
+    }
+    void init(int n) {
+        this->n = n;
+        e.clear();
+        g.assign(n, {});
+        cur.resize(n);
+        h.resize(n);
+    }
+    bool bfs(int s, int t) {
+        h.assign(n, -1);
+        std::queue<int> que;
+        h[s] = 0;
+        que.push(s);
+        while (!que.empty()) {
+            const int u = que.front();
+            que.pop();
+            for (int i : g[u]) {
+                auto [v, c] = e[i];
+                if (c > 0 && h[v] == -1) {
+                    h[v] = h[u] + 1;
+                    if (v == t) {
+                        return true;
+                    }
+                    que.push(v);
+                }
+            }
+        }
+        return false;
+    }
+    T dfs(int u, int t, T f) {
+        if (u == t) {
+            return f;
+        }
+        auto r = f;
+        for (int &i = cur[u]; i < int(g[u].size()); ++i) {
+            const int j = g[u][i];
+            auto [v, c] = e[j];
+            if (c > 0 && h[v] == h[u] + 1) {
+                auto a = dfs(v, t, std::min(r, c));
+                e[j].cap -= a;
+                e[j ^ 1].cap += a;
+                r -= a;
+                if (r == 0) {
+                    return f;
+                }
+            }
+        }
+        return f - r;
+    }
+    void addEdge(int u, int v, T c) {
+        g[u].push_back(e.size());
+        e.emplace_back(v, c);
+        g[v].push_back(e.size());
+        e.emplace_back(u, 0);
+    }
+    T flow(int s, int t) {
+        T ans = 0;
+        while (bfs(s, t)) {
+            cur.assign(n, 0);
+            ans += dfs(s, t, std::numeric_limits<T>::max());
+        }
+        return ans;
+    }
+    std::vector<bool> minCut() {
+        std::vector<bool> c(n);
+        for (int i = 0; i < n; i++) {
+            c[i] = (h[i] != -1);
+        }
+        return c;
+    }
+    struct Edge {
+        int from;
+        int to;
+        T cap;
+        T flow;
+    };
+    std::vector<Edge> edges() {
+        std::vector<Edge> a;
+        for (int i = 0; i < e.size(); i += 2) {
+            Edge x;
+            x.from = e[i + 1].to;
+            x.to = e[i].to;
+            x.cap = e[i].cap + e[i + 1].cap;
+            x.flow = e[i + 1].cap;
+            a.push_back(x);
+        }
+        return a;
+    }
+};MaxFlow<int>g(2*n+2);
+
+//dijkstra求最小费用最大流
 namespace mcmf {
 	using pr = std::pair<i64, int>;
 	const int N = 5005, M = 100005;
@@ -2054,6 +2285,8 @@ namespace mcmf {
 
 ### Tarjan算法
 
+------
+
 #### 强连通分量
 
 ```c++
@@ -2094,6 +2327,8 @@ function<void(int)> tarjan = [&] (int u)
     }
 };
 ```
+
+
 
 #### 割点与点双
 
@@ -2188,7 +2423,11 @@ for(int i=1;i<=n;i++)
 }
 ```
 
+
+
 ### 最短路
+
+------
 
 #### Bellman-Ford 算法
 
@@ -2226,11 +2465,9 @@ auto bellmanford = [&] (int s)
     // 第 n 轮循环仍然可以松弛时说明 s 点可以抵达一个负环
     return flag;
 };
-```
 
-队列优化：SPFA
 
-```c++
+//队列优化：SPFA
 auto spfa = [&] (int s)
 {
     vector<int>dis(n+1,1e9),vis(n+1,0),cnt(n+1);
@@ -2258,7 +2495,11 @@ auto spfa = [&] (int s)
 };
 ```
 
+
+
 #### Dijkstra 算法
+
+------
 
 一种求解 **非负权图** 上单源最短路径的算法
 
@@ -2298,31 +2539,20 @@ auto dijkstra = [&] (int s)
 };
 ```
 
-#### 优先队列
 
-```c++
-priority_queue<int,vector<int>,greater> q//小根堆
 
-struct node{//结构体重载运算
-    int x,y;
-}
-bool operator<(const node &a,const node &b)
-{
-    return a.x>b.x;
-}
-priority_queue<node> Q;
+## 树
 
-```
+### 树的基础
 
-### 树
+------
 
-#### 树形DP求树直径
-
-任意一点到图中最远的点是直径的一个端点，从这个端点到图中最远的点就是直径的另一个端点
+#### 树的直径
 
 ```c++
 //树形dp可以在存在负权边的情况下求解出树的直径。
-//我们记录当 1 为树的根时，每个节点作为子树的根向下，所能延伸的最长路径长度d1与次长路径（与最长路径无公共边）长度d2，那么直径就是对于每一个点，该点 d1 + d2能取到的值中的最大值。
+//记录每个节点作为子树的根时，向下延伸的最长路径长度d1与次长路径（与最长路径无公共边）长度d2
+//直径是每一个点的 d1 + d2 的最大值。
 vector<vector<pii>> g(n+1);
 vector<int>d1(n+1),d2(n+1);
 for (int i = 1; i < n; i++) 
@@ -2344,117 +2574,15 @@ function<void(int,int)> dfs = [&] (int u,int fa)
     }
     d = max(d, d1[u] + d2[u]);
 };
-dfs(1, 0);
-cout << d << "\n";
-
 ```
 
-#### 最近公共祖先(LCA)
 
-##### 倍增算法
-
-```c++
-//倍增算法是最经典的LCA算法，通过预处理fa[x][i]数组，fa[x][i]表示点 x 的第 2^i 个祖先。
-//fa[x][i]数组可以通过 dfs 预处理出来。
-
-vector<vector<int>>f(n+1,vector<int>(31,0));
-vector<int>dep(n+1,0);
-function<void(int,int)> dfs = [&] (int u,int fa)
-{
-    f[u][0]=fa;dep[u]=dep[fa]+1;
-    for(int i=1;i<=30;i++)
-    {
-        f[u][i]=f[f[u][i-1]][i-1];
-    }
-    for(int v:g[u])
-    {
-        if(v==fa) continue;
-        dfs(v,u);
-    }
-};//dfs预处理
-dfs(1,0);
-
-auto LCA = [&](int x,int y)
-{
-    if(dep[x]>dep[y]) swap(x,y);
-    int temp=dep[y]-dep[x];
-    for(int j=0;temp;j++,temp>>=1)
-    {
-        if(temp&1) y=f[y][j];
-    }
-    if(y==x) return x;
-
-    for(int i=30;i>=0 && x!=y ;i--)
-    {
-        if(f[x][i]!=f[y][i])
-        {
-            x=f[x][i],y=f[y][i];
-        }
-    }
-    return f[x][0];
-};//LCA算法求最近公共祖先
-```
-
-##### 欧拉序求LCA
-
-```c++
-int n,m,root;cin>>n>>m>>root;
-vector<vector<int>>g(n+1);
-for(int i=1;i<n;i++)
-{
-    int u,v;cin>>u>>v;
-    g[u].emplace_back(v);
-    g[v].push_back(u);
-}
-vector<int>dep(n+1,0),a(2*n+1,0),p(n+1,0);//a数组表示树的欧拉序列，p数组表示各个值第一次出现的位置
-int cnt=0;//两点第一次出现的位置之间的深度最小的就是两者的最近公共祖先
-function<void(int,int)> dfs = [&] (int u,int fa)
-{
-    dep[u]=dep[fa]+1;
-    a[++cnt]=u;p[u]=cnt;
-    for(auto v:g[u])
-    {
-        if(v==fa) continue;
-        dfs(v,u);
-        a[++cnt]=u;
-    }
-};
-dfs(root,0);
-vector<vector<pii>>f(cnt+1,vector<pii>(32));
-
-auto  quiry = [&] (int l,int r)
-{
-    int ln=(int)(log(r-l+1)/log(2));
-    return (min(f[l][ln],f[r-(1<<ln)+1][ln]));
-};
-for(int i=1;i<=cnt;i++)
-{
-    f[i][0]={dep[a[i]],a[i]};
-}
-int len=(int)(log(cnt)/log(2));
-for(int j=1;j<=len;j++)
-{
-    for(int i=1;i<=cnt-(1<<j)+1;i++)
-    {
-        f[i][j]=min(f[i][j-1],f[i+(1<<(j-1))][j-1]);
-    }
-}
-while(m--)
-{
-    int l,r;cin>>l>>r;
-    l=p[l],r=p[r];
-    if(l>r) swap(l,r);
-    cout<<quiry(l,r).second<<"\n";
-}
-```
 
 #### 树的重心
 
-对于树上的每一个点，计算其所有子树中最大的子树节点数，这个值最小的点就是这棵树的重心。
-
-一棵树的重心最多有两个，并且相邻
-
 ```c++
+//计算节点所有子树中最大的子树节点数，值最小的点就是这棵树的重心
+//一棵树的重心最多有两个，并且相邻
 vector<int>siz(n+1),weight(n+1),centroid(2);
 vector<vector<int>>g(n+1);
 function<void(int,int)>  GetCentroid = [&] (int u, int fa) 
@@ -2476,24 +2604,118 @@ function<void(int,int)>  GetCentroid = [&] (int u, int fa)
 };
 ```
 
-#### 树上启发式合并 Dsu on tree
 
-对于节点i：
 
-- 遍历每一个节点
-  - 递归解决所有的轻儿子，同时消除递归产生的影响
-- 递归重儿子，不消除递归的影响
-- 统计所有轻儿子对答案的影响
-- 更新该节点的答案
-- 删除所有轻儿子对答案的影响
+### LCA
+
+------
+
+#### 倍增算法
 
 ```c++
-//cf600E
-//解决树上离线问题，nlogn
+//倍增算法是经典的LCA算法，通过预处理fa[x][i]数组，fa[x][i]表示点 x 的第 2^i 个祖先。
+//fa[x][i]数组可以通过 dfs 预处理出来。
+
+vector f(n+1,vector<int>(31));
+vector<int>dep(n+1);
+function<void(int,int)> dfs = [&] (int u,int fa)
+{
+    f[u][0]=fa;dep[u]=dep[fa]+1;
+    for(int i=1;i<=30;i++)
+    {
+        f[u][i]=f[f[u][i-1]][i-1];
+    }
+    for(int v:g[u])
+    {
+        if(v==fa) continue;
+        dfs(v,u);
+    }
+};dfs(1,0);
+
+auto LCA = [&](int x,int y)
+{
+    if(dep[x]>dep[y]) swap(x,y);
+    int temp=dep[y]-dep[x];
+    for(int j=0;temp;j++,temp>>=1)
+    {
+        if(temp&1) y=f[y][j];
+    }
+    if(y==x) return x;
+
+    for(int i=30;i>=0 && x!=y ;i--)
+    {
+        if(f[x][i]!=f[y][i])
+        {
+            x=f[x][i],y=f[y][i];
+        }
+    }
+    return f[x][0];
+};
+```
+
+
+
+#### 欧拉序求LCA
+
+```c++
+//得到欧拉序之后，两点第一次出现的位置之间的深度最小的点就是LCA
+//求区间深度最小值利用st表
+
+//a数组表示欧拉序列，p数组表示各个值第一次出现的位置
+vector<int>dep(n+1,0),a(2*n+1),p(n+1);
+int tim=0;
+function<void(int,int)> dfs = [&] (int u,int fa)
+{
+    dep[u]=dep[fa]+1;
+    a[++tim]=u;p[u]=tim;
+    for(auto v:g[u]) if(v!=fa)
+    {
+        dfs(v,u);
+        a[++tim]=u;
+    }
+};dfs(1,0);
+
+vector<vector<pii>>f(cnt+1,vector<pii>(31));
+for(int i=1;i<=cnt;i++)
+{
+    f[i][0]={dep[a[i]],a[i]};
+}
+int len=(int)(log(cnt)/log(2));
+for(int j=1;j<=len;j++)
+{
+    for(int i=1;i<=cnt-(1<<j)+1;i++)
+    {
+        f[i][j]=min(f[i][j-1],f[i+(1<<(j-1))][j-1]);
+    }
+}
+auto quiry = [&] (int l,int r)
+{
+    l=p[l],r=p[r];
+    if(l>r) swap(l,r);
+    int ln=(int)(log(r-l+1)/log(2));
+    return (min(f[l][ln],f[r-(1<<ln)+1][ln]));
+};
+```
+
+
+
+### Dsu on tree
+
+------
+
+遍历一个节点u：
+
+- 遍历所有轻儿子，计算答案，但是不保留遍历之后的影响
+- 遍历重儿子，保留遍历之后的影响
+- 再次遍历所有轻儿子，加入这些节点的贡献
+
+```c++
+//https://codeforces.com/contest/600/problem/E
+//解决树上离线问题
 int main()
 {
     int n;cin>>n;
-    vector<i64>col(n+1,0),siz(n+1,0),son(n+1,0),ans(n+1,0),cnt(n+1,0);
+    vector<i64>col(n+1),siz(n+1),son(n+1),ans(n+1),cnt(n+1);
     i64 mx=0,sum=0,Son=0;
     for(int i=1;i<=n;i++) cin>>col[i];
     vector<vector<int>>g(n+1);
@@ -2513,8 +2735,8 @@ int main()
             siz[x]+=siz[y];
             if(siz[y]>siz[son[x]]) son[x]=y;////轻重链剖分
         }
-    };
-    dfs1(1,0);
+    };dfs1(1,0);
+    
     function<void(int,int,int)> add = [&] (int x,int fa,int val)
     {
         cnt[col[x]]+=val;
@@ -2531,11 +2753,11 @@ int main()
     };
     function<void(int,int,int)> dfs2 = [&] (int x,int fa,int op)
     {
-        for(auto y:g[x])
+        for(auto y:g[x]) if(y!=fa)
         {
-            if(y==fa) continue;
-            if(y!=son[x]) dfs2(y,x,0);//暴力统计轻边的贡献，opt = 0表示递归完成后消除对该点的影响
-        }
+            if(y!=son[x]) dfs2(y,x,0);
+        }//暴力统计轻边的贡献，op = 0表示递归完成后消除对该点的影响
+        
         if(son[x]) dfs2(son[x],x,1),Son=son[x];//统计重儿子的贡献，不消除影响
 
         add(x,fa,1);Son=0;//暴力统计所有轻儿子的贡献
@@ -2553,23 +2775,21 @@ int main()
 }
 ```
 
-#### 虚树
 
-##### 二次排序+LCA
+
+### 虚树
+
+------
+
+#### 二次排序 + LCA
 
 ```c++
-int n;cin>>n;
-vector<int>a(n+1),col[n+1];
-for(int i=1;i<=n;i++) cin>>a[i],col[a[i]].push_back(i);
-vector<vector<int>>g(n+1);
-for(int i=1;i<n;i++)
-{
-    int u,v;cin>>u>>v;
-    g[u].push_back(v);
-    g[v].push_back(u);
-}
+//将关键点按 DFS 序排序
+//遍历一遍，任意两个相邻的关键点求一下 LCA，并且判重
+//然后根据原树中的祖先后代关系建树
+
 vector<int>dfn(n+1),dep(n+1);int tot=0;
-vector<vector<int>>f(n+1,vector<int>(31,0));
+vector<vector<int>>f(n+1,vector<int>(31));
 function<void(int,int)> dfs1 = [&] (int u,int fa)
 {   
     f[u][0]=fa;dep[u]=dep[fa]+1;
@@ -2578,12 +2798,12 @@ function<void(int,int)> dfs1 = [&] (int u,int fa)
     {
         f[u][i]=f[f[u][i-1]][i-1];
     }
-    for(auto v:g[u])
+    for(auto v:g[u]) if(v!=fa)
     {
-        if(v==fa) continue;
         dfs1(v,u);
     }
 };dfs1(1,0);
+
 auto LCA = [&](int x,int y)
 {
     if(dep[x]>dep[y]) swap(x,y);
@@ -2602,8 +2822,9 @@ auto LCA = [&](int x,int y)
         }
     }
     return f[x][0];
-};//LCA算法求最近公共祖先
-vector<vector<int>>e(n+1);
+};
+
+vector<vector<int>>e(n+1);//虚树
 auto buildvt = [&] (vector<int>h)
 {
     auto cmp = [&] (int x,int y){
@@ -2611,8 +2832,8 @@ auto buildvt = [&] (vector<int>h)
     };//按照dfn序进行排序
     sort(h.begin(),h.end(),cmp);
     int m=h.size();
-    for(int i=1;i<m;i++) h.push_back(LCA(h[i-1],h[i]));
-    h.push_back(1);//加入相邻两个数的lca
+    for(int i=1;i<m;i++) h.push_back(LCA(h[i-1],h[i]));//加入相邻两个数的lca
+    h.push_back(1);
     sort(h.begin(),h.end(),cmp);
     h.erase(unique(h.begin(),h.end()),h.end());
     m=h.size();
@@ -2630,7 +2851,11 @@ for(int i=1;i<=n;i++) if(!col[i].empty())
 }
 ```
 
+
+
 ### 珂朵莉树
+
+------
 
 **什么是珂朵莉树？**
 
@@ -2679,6 +2904,108 @@ void emerge(int l,int r,int x)//区间赋值，合并区间
     st.insert(ran(l,r,x));
 }
 ```
+
+
+
+### Kruskal重构树
+
+------
+
+- Kruskal 重构树就是基于 Kruskal 的最小生成树算法在无向图中得出的树所构造而成的树
+
+- 把最小生成树上的边从小到大取出来，这条边为 x 与 y 连边，那么我们新建节点 now，将 now 连向 *x*,*y*，将now的点权设为这条边的边权，x 与 y 之间不连边。
+
+
+
+```c++
+//二叉树
+//原节点是Kruskal重构树的叶子节点
+//原图中两个点间所有路径上的边最大权值的最小值 = 最小生成树上两点简单路径的边最大权值 = Kruskal 重构树上两点 LCA 的点权
+void Ex_Kruskal()
+{
+    int cnt=n;
+    sort(edge.begin(),edge.end());
+    for(int i=0;i<m;i++)
+    {
+        auto [u,v,w]=edge[i];
+        int fx=find(u),fy=find(v);
+        if(fx!=fy)
+        {
+            cnt++;
+            weight[cnt]=w;
+            fa[fx]=cnt,fa[fy]=cnt;
+            lch[cnt]=fx,rch[cnt]=fy;
+		}
+	}
+}
+```
+
+
+
+### Prufer序列
+
+------
+
+对树建立 Prufer 序列,每次选择一个编号最小的叶结点并删掉它，然后在序列中记录下它连接到的那个结点。重复n-2次后就只剩下两个结点。
+
+```c++
+//在构造完 Prüfer 序列后原树中会剩下两个结点，其中一个一定是编号最大的点 n。
+//每个结点在序列中出现的次数是其度数减 1。（没有出现的就是叶结点）
+
+//利用小根堆来建立树的prufer序列
+vector<vector<int>> adj;
+vector<int> pruefer_code() 
+{
+    int n = adj.size();
+    set<int> leafs;
+    vector<int> degree(n);
+    vector<bool> killed(n);
+    for (int i = 0; i < n; i++) {
+        degree[i] = adj[i].size();
+        if (degree[i] == 1) leafs.insert(i);
+    }
+
+    vector<int> code(n - 2);
+    for (int i = 0; i < n - 2; i++) {
+        int leaf = *leafs.begin();
+        leafs.erase(leafs.begin());
+        killed[leaf] = true;
+        int v;
+        for (int u : adj[leaf])
+            if (!killed[u]) v = u;
+        code[i] = v;
+        if (--degree[v] == 1) leafs.insert(v);
+    }
+    return code;
+}
+
+//根据 Prüfer 序列的性质，我们可以得到原树上每个点的度数。然后你也可以得到编号最小的叶结点，而这个结点一定与 Prüfer 序列的第一个数连接。然后我们同时删掉这两个结点的度数。
+
+//每次我们选择一个度数为 1 的最小的结点编号，与当前枚举到的 Prüfer 序列的点连接，然后同时减掉两个点的度。到最后我们剩下两个度数为 1 的点，其中一个是结点 n。就把它们建立连接。使用堆维护这个过程，在减度数的过程中如果发现度数减到 1 就把这个结点添加到堆中
+vector<pair<int, int>> pruefer_decode(vector<int> const& code) 
+{
+      int n = code.size() + 2;
+      vector<int> degree(n, 1);
+      for (int i : code) degree[i]++;
+
+      set<int> leaves;
+      for (int i = 0; i < n; i++)
+        if (degree[i] == 1) leaves.insert(i);
+
+      vector<pair<int, int>> edges;
+      for (int v : code) {
+        int leaf = *leaves.begin();
+        leaves.erase(leaves.begin());
+
+        edges.emplace_back(leaf, v);
+        if (--degree[v] == 1) leaves.insert(v);
+      }
+      edges.emplace_back(*leaves.begin(), n - 1);
+      return edges;
+}
+```
+
+
 
 ## 字符串
 
@@ -2753,24 +3080,92 @@ auto kmp = [&] (string t)
 };
 ```
 
-## DP
 
-#### 快速枚举子集
+
+### SA
+
+------
+
+![image-20240920141341707](C:\Users\GLH\AppData\Roaming\Typora\typora-user-images\image-20240920141341707.png)
+
+倍增排序时间复杂度为O($\ nlog^2 n$）
 
 ```c++
-//快速枚举子集
-for (int i = 1; i < (1 << n); ++i)
+//倍增排序
+string s;cin>>s;s=" "+s;
+int n=s.size()-1;
+vector<int>sa(n+1),rk(2*n+1),oldrk(n+n+1);
+for (int i = 1;i <= n; ++i) sa[i] = i, rk[i] = s[i];
+for (int w = 1; w < n; w <<= 1) 
 {
-    for (int j = i; j; j = (j - 1) & i)
+    sort(sa.begin()+1, sa.end(), [&](int x, int y) {
+    	return rk[x] == rk[y] ? rk[x + w] < rk[y + w] : rk[x] < rk[y];
+    });
+    oldrk=rk;// 由于计算 rk 的时候原来的 rk 会被覆盖，要先复制一份
+    for (int p = 0, i = 1; i <= n; ++i) 
     {
-        //对n个元素的所有子集进行枚举
+        if (oldrk[sa[i]] == oldrk[sa[i - 1]] && oldrk[sa[i] + w] == oldrk[sa[i - 1] + w]) 
+        {
+        	rk[sa[i]] = p;
+        } 
+        else 
+        {
+            rk[sa[i]] = ++p;
+        }  // 若两个子串相同，它们对应的 rk 也需要相同，所以要去重
     }
 }
 ```
 
+
+
+## DP
+
+### SOS DP
+
+解决子集和问题，$\text{sum}[i] = \sum_{j \subseteq i} a[j]$
+
+常规的O($3^n$)写法
+
+```c++
+for(int i=0;i<1<<n;i++) {
+    sum[i]=a[0];
+    for(int j=i;j;j=(j-1)&i) {
+        sum[i]+=a[j];
+    }
+}
+```
+
+sos dp 时间复杂度为O($n2^n$)
+
+```c++
+for(int i=0;i<n;i++) {
+    for(int j=0;j<1<<n;j++) if(j&(1<<i)) {
+        sum[j]+=sum[j^(1<<i)];
+    }
+}//解决子集和
+
+for(int i=0;i<n;i++) {
+    for(int j=(1<<n)-1;~j;j--) if(j&(1<<i)) {
+        sum[j^(1<<i)]+=sum[j];
+    }
+}//维护超集和
+```
+
+
+
+### Bitset优化01背包
+
+```c++
+for(int i=1;i<=n;i++)
+	bt |= (bt<<a[i]);
+
+```
+
+
+
 ## 计算几何
 
-#### 凸包
+### 凸包
 
 ```c++
 const double eps=1e-9; 
@@ -2887,5 +3282,62 @@ auto gatmax = [&]()
     }
     return mx;
 }//凸包直径
+```
+
+### 三维直线
+
+```c++
+struct Point{
+    double x, y, z;
+    Point(double x = 0, double y = 0, double z = 0) : x(x), y(y), z(z) {}
+};
+
+// 向量减法
+Point operator-(const Point& a, const Point& b)
+{
+    return Point(a.x - b.x, a.y - b.y, a.z - b.z);
+}
+
+// 向量叉积
+Point cross(const Point& a, const Point& b) 
+{
+    return Point(
+        a.y * b.z - a.z * b.y,
+        a.z * b.x - a.x * b.z,
+        a.x * b.y - a.y * b.x
+    );
+}
+
+// 向量点积
+double dot(const Point& a, const Point& b) 
+{
+    return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+// 向量模长
+double norm(const Point& a) 
+{
+    return sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
+}
+
+// 计算两条直线的最近距离
+double LineDis(const Point& P1, const Point& P2, const Point& Q1, const Point& Q2) 
+{
+    Point u = P2 - P1; 
+    Point v = Q2 - Q1; 
+    Point w = Q1 - P1; 
+
+    Point n = cross(u, v);
+
+    if (norm(n) < 1e-10) // 两条直线平行
+    { 
+        Point now = cross(w, u);
+        return norm(now) / norm(u);
+    } 
+    else 
+    {
+        return fabs(dot(w, n)) / norm(n);
+    }
+}
 ```
 
