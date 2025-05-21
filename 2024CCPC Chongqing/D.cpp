@@ -10,7 +10,7 @@ using namespace std;
 
 constexpr i64 mod = 998244353;
 
-i64 exgcd(i64 a,i64 b,i64 &x,i64 &y)//扩展欧几里得算法
+i64 exgcd(i64 a,i64 b,i64 &x,i64 &y)
 {
     if(!b)
     {
@@ -23,14 +23,12 @@ i64 exgcd(i64 a,i64 b,i64 &x,i64 &y)//扩展欧几里得算法
     y=xx-(a/b)*yy;
     return Gcd;
 }
-//求的是ax+by=gcd(a,b)的一组整数解x,y
-//b/=g,a/=g
-//通解为x1=x0+bt,y1=y0-at，t为整数
-i64 cal(i64 a,i64 b,i64 c)//计算最小正整数解
+
+i64 cal(i64 a,i64 b,i64 c)
 {
     i64 x,y;
     i64 gcd=exgcd(a,b,x,y);
-    if(c%gcd) return -1;//无解
+    if(c%gcd) return -1;
     b/=gcd;if(b<0) b=-b;
     x=x*(c/gcd)%b;
     if(x<0) x+=b;

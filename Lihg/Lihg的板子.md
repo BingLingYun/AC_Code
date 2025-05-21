@@ -1384,17 +1384,17 @@ struct SegmentTree{
         if(y>mid) modify(u<<1|1,mid+1,r,x,y,k);
         pushup(u);
     }
-    i64 quiry(int u,int l,int r,int x,int y)
+    Info quiry(int u,int l,int r,int x,int y)
     {
         if(x<=l && r<=y)
         {
-            return info[u].mn;
+            return info[u];
         }
         pushdown(u);
         int mid=l+r>>1;
         if(y<=mid) return quiry(u<<1,l,mid,x,y);
         else if(x>mid) return quiry(u<<1|1,mid+1,r,x,y);
-        else return min(quiry(u<<1,l,mid,x,y),quiry(u<<1|1,mid+1,r,x,y));
+        return quiry(u<<1,l,mid,x,y)+quiry(u<<1|1,mid+1,r,x,y);
     }
 };
 
