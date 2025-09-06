@@ -570,6 +570,291 @@ int main()
 
 ```
 
+### 多项式
+
+```c++
+#include<iostream>
+#include<cstring>
+#include<vector>
+#include<algorithm>
+using namespace std;
+using LL = long long;
+const int maxn = 2e6 + 5, mod = 998244353, G = 3, Gi = 332748118;
+
+int qpow(int a, int b, int mod){
+    int res = 1;
+    while (b){
+        if (b & 1) res = 1LL * res * a % mod;
+        a = 1LL * a * a % mod;
+        b >>= 1;
+    }
+    return res;
+}
+
+inline int mul(int a, int b){
+    return 1LL * a * b % mod;
+}
+
+inline void add(int &a, int b){
+    a += b;
+    if (a >= mod) a -= mod;
+}
+
+inline void sub(int &a, int b){
+    a -= b;
+    if (a < 0) a += mod;
+}
+
+int inv[(1 << 21) + 5], fact[(1 << 21) + 5], invfact[(1 << 21) + 5];
+void init(int n){
+    inv[1] = 1;
+    for(int i = 2; i <= n; i++)
+        inv[i] = 1LL * (mod - mod / i) * inv[mod % i] % mod; 
+    fact[0] = invfact[0] = 1;
+    for(int i = 1; i <= n; i++)
+        fact[i] = mul(fact[i - 1], i);
+    invfact[n] = qpow(fact[n], mod - 2, mod);
+    for(int i = n - 1; i >= 1; i--)
+        invfact[i] = mul(invfact[i + 1], i + 1);  
+}
+
+int C(int a, int b){
+    if (a < 0 || b < 0 || a < b) return 0;
+    return mul(mul(fact[a], invfact[b]), invfact[a - b]);
+}
+
+namespace NTT{
+    vector<int> Omega(int L){
+        int wn = qpow(G, mod / L, mod);
+        vector<int> w(L); 
+        w[L >> 1] = 1;
+        for(int i = L / 2 + 1; i < L; i++) w[i] = mul(w[i - 1], wn);
+        for(int i = L / 2 - 1; i >= 1; i--) w[i] = w[i << 1];
+        return w;
+    }
+    auto W = Omega(1 << 21);
+
+    void DIF(int *a, int n) {
+        for(int k = n >> 1; k; k >>= 1)
+            for(int i = 0, y; i < n; i += k << 1)
+                for(int j = 0; j < k; j++){
+                    y = a[i + j + k], a[i + j + k] = mul(a[i + j] - y + mod, W[k + j]), 
+                    add(a[i + j], y);
+                }
+    }
+
+    void IDIT(int *a, int n) {
+        for (int k = 1; k < n; k <<= 1)
+            for (int i = 0, x, y; i < n; i += k << 1)
+                for(int j = 0; j < k; j++){
+                    x = a[i + j], y = mul(a[i + j + k], W[k + j]),
+                    a[i + j + k] = x - y < 0 ? x - y + mod : x - y;
+                    add(a[i + j], y);
+                }
+        int inv = mod - (mod - 1) / n;
+        for(int i = 0; i < n; i++) a[i] = mul(a[i], inv);
+        reverse(a + 1, a + n);
+    }
+}
+
+using Poly = std::vector<int>;
+
+void DFT(Poly &a){
+    NTT::DIF(a.data(), a.size());
+}
+
+void IDFT(Poly &a){
+    NTT::IDIT(a.data(), a.size());
+}
+
+int normed(int n) { 
+    return n == 1 ? 1 : (1 << (32 - __builtin_clz(n - 1))); 
+}
+
+void norm(Poly &a) { 
+    if (!a.empty()) a.resize(normed((int)a.size()), 0); 
+}
+
+void dot(Poly &a, Poly &b) {
+    for(int i = 0; i < a.size(); i++)
+        a[i] = mul(a[i], b[i]);
+}
+
+Poly operator*(Poly a, Poly b) {
+    int n = a.size() + b.size() - 1, L = normed(n);
+    if (a.size() <= 8 || b.size() <= 8) {
+        Poly c(n);
+        for(int i = 0; i < a.size(); i++)
+            for(int j = 0; j < b.size(); j++)
+                c[i + j] = (c[i + j] + 1LL * a[i] * b[j]) % mod;
+        return c;
+    }
+    a.resize(L), b.resize(L);
+    DFT(a), DFT(b), dot(a, b), IDFT(a);
+    return a.resize(n), a;
+}
+
+Poly Inv2k(Poly a) { // a.size() = 2^k
+    int n = a.size(), m = n >> 1;
+    if (n == 0) return {0};
+    if (n == 1) return {qpow(a[0], mod - 2, mod)};
+    Poly b = Inv2k(Poly(a.begin(), a.begin() + m)), c = b;
+    b.resize(n), DFT(a), DFT(b), dot(a, b), IDFT(a);
+    for(int i = 0; i < n; i++) a[i] = i < m ? 0 : mod - a[i];
+    DFT(a), dot(a, b), IDFT(a);
+    return move(c.begin(), c.end(), a.begin()), a;
+}
+
+Poly Inv(Poly a) {
+    int n = a.size();
+    norm(a), a = Inv2k(a);
+    return a.resize(n), a;
+}
+
+Poly &operator*=(Poly &a, int b){ 
+    for(auto &x : a) x = mul(x, b); 
+    return a; 
+}
+
+Poly operator*(Poly a, int b){ 
+    return a *= b;
+}
+
+Poly operator*(int a, Poly b){
+    return b * a; 
+}
+
+Poly &operator/=(Poly &a, int b){ 
+    return a *= qpow(b, mod - 2, mod); 
+}
+
+Poly operator/(Poly a, int b){ 
+    return a /= b; 
+}
+
+Poly &operator+=(Poly &a, Poly b) {
+    a.resize(max(a.size(), b.size()));
+    for(int i = 0; i < b.size(); i++) add(a[i], b[i]);
+    return a;
+}
+
+Poly operator+(Poly a, Poly b){ 
+    return a += b;
+}
+
+Poly &operator-=(Poly &a, Poly b) {
+    a.resize(max(a.size(), b.size()));
+    for(int i = 0; i < b.size(); i++) sub(a[i], b[i]);
+    return a;
+}
+
+Poly operator-(Poly a, Poly b) { 
+    return a -= b; 
+}
+
+Poly operator/(Poly a, Poly b){
+    int k = a.size() - b.size() + 1;
+    if (k < 0) return {0};
+    reverse(a.begin(), a.end());
+    reverse(b.begin(), b.end());
+    b.resize(k), a = a * Inv(b);
+    a.resize(k), reverse(a.begin(), a.end());
+    return a;
+}
+
+pair<Poly, Poly> operator%(Poly a, const Poly& b) {
+    Poly c = a / b;
+    a -= b * c, a.resize(b.size() - 1);
+    return {c, a};
+}
+
+Poly Sqrt(Poly a) { // a0 = 1
+    int n = a.size(), k = normed(n);
+    Poly b = {1}, c;
+    a.resize(k * 2, 0);
+    for (int L = 2; L <= k; L <<= 1) {
+        b.resize(2 * L, 0), c = Poly(a.begin(), a.begin() + L) * Inv(b);
+        for(int i = 0; i < 2 * L - 1; i++) b[i] = mul(b[i] + c[i], (mod + 1) / 2);
+    }
+    return b.resize(n), b;
+}
+
+void Derivative(Poly &a) {
+    for(int i = 1; i < a.size(); i++) 
+        a[i - 1] = mul(i, a[i]);
+    a.pop_back();
+}
+
+void Integral(Poly &a) {
+    for(int i = a.size() - 1; i >= 1; i--)
+        a[i] = mul(inv[i], a[i - 1]);
+    a[0] = 0;
+}
+
+Poly Ln(Poly a){
+    int n = a.size();
+    Poly b = a;
+    Derivative(b);
+    a = b * Inv(a);
+    a.resize(n);
+    Integral(a);
+    return a;
+}
+
+Poly Exp2k(Poly a){ // a.size() = 2^k
+    int n = a.size(), m = n >> 1;
+    if (n == 0) return {0};
+    if (n == 1) return Poly(1, 1);
+    Poly b = Exp2k(Poly(a.begin(), a.begin() + m));
+    b.resize(n);
+    Poly c = Ln(b);
+    for(int i = 0; i < n; i++)
+        c[i] = (a[i] - c[i] + mod) % mod;
+    c[0]++;
+    b = b * c;
+    return b.resize(n), b;
+}
+
+Poly Exp(Poly a) { // a0 = 0
+    int n = a.size();
+    norm(a), a = Exp2k(a);
+    return a.resize(n), a;
+}
+
+Poly Pow(Poly a, int k){ // a0 = 1, k % mod not mod - 1
+    return Exp(Ln(a) * k);
+}
+
+int main(){
+
+#ifdef LOCAL
+    freopen("data.in", "r", stdin);
+    freopen("data.out", "w", stdout);
+#endif
+
+    cin.tie(0);
+    cout.tie(0);
+    ios::sync_with_stdio(0);
+
+    init(1000'000);
+    int n, m;
+    cin >> n >> m;
+    Poly a(m + 1);
+    for(int i = 0; i <= m; i++){
+        a[i] = C(i + n - 1, n - 1);
+    }
+    auto ans = Pow(a, n - 1);
+    int sum = 0;
+    for(int i = 0; i <= m; i++){
+        add(sum, ans[i]);
+    }
+    cout << sum << '\n';
+
+}
+```
+
+
+
 ## 数论
 
 ### 欧几里得算法
@@ -1717,7 +2002,7 @@ void erase(int x)
 {
     if(S.empty())
     {
-        T.erase(T.lower_bound(x))
+        T.erase(T.lower_bound(x));
 	}
     else
     {
@@ -2291,7 +2576,7 @@ namespace mcmf {
 
 ```c++
 vector<int>dfn(n+1),low(n+1),s(n+1),in_stack(n+1);
-int dfncnt,tp,sc;
+int dfncnt=0,tp=0,sc=0;
 vector<int>scc(n+1);  // 结点 i 所在 SCC 的编号
 vector<int>sz(n+1);       // 强连通 i 的大小
 
@@ -2777,6 +3062,56 @@ int main()
 
 
 
+### 树链剖分
+
+```c++
+void dfs1(int x){
+    siz[x]=1;hson[x]=0;
+    for(int y:G[x]){
+        if(y==fa[x])continue;
+        fa[y]=x;
+        dep[y]=dep[x]+1;
+        dfs1(y);
+        if(siz[y]>siz[hson[x]])hson[x]=y;
+        siz[x]+=siz[y];
+    }
+}
+void dfs2(int x,int topf){
+    top[x]=topf;
+    fdfn[dfn[x]=++dfc]=x;
+    if(hson[x]){
+        dfs2(hson[x],topf);
+    }
+    for(int y:G[x]){
+        if(y==fa[x]||y==hson[x])continue;
+        dfs2(y,y);
+    }
+}
+ int ask(int l, int r) { // 链上查询
+        debug(0, l, r);
+        int ans = 0;
+        while (top[l] != top[r]) {
+            if (dep[top[l]] < dep[top[r]]) {
+                swap(l, r);
+            }
+            debug(1, l, r);
+            ans = max(ans, segt.ask(id[top[l]], id[l]));
+            ans = max(ans, segt.ask(id[top[l]], id[top[l]]) + addv[parent[top[l]]]);
+            l = parent[top[l]];
+        }
+        if (dep[l] > dep[r]) {
+            swap(l, r);
+        }
+        ans = max(ans, segt.ask(id[l], id[r]));
+        if (l != son[parent[l]])
+            ans = max(ans, segt.ask(id[l], id[l]) + addv[parent[l]]);   
+        debug(2, l, r);
+        return ans;
+    }
+```
+
+
+
 ### 虚树
 
 ------
@@ -3114,6 +3449,25 @@ for (int w = 1; w < n; w <<= 1)
         }  // 若两个子串相同，它们对应的 rk 也需要相同，所以要去重
     }
 }
+if(n==1) rk[1]=1;
+```
+
+![image-20250902091645163](C:\Users\GLH\AppData\Roaming\Typora\typora-user-images\image-20250902091645163.png)
+
+O(n)求height数组
+
+```c++
+vector<int> height(n + 1);
+for (int i = 1, k = 0; i <= n; ++i)
+{
+    if (rk[i] == 0)
+        continue;
+    if (k)
+        --k;
+    while (s[i + k] == s[sa[rk[i] - 1] + k])
+        ++k;
+    height[rk[i]] = k;
+}
 ```
 
 
@@ -3138,8 +3492,11 @@ for(int i=0;i<1<<n;i++) {
 sos dp 时间复杂度为O($n2^n$)
 
 ```c++
-for(int i=0;i<n;i++) {
-    for(int j=0;j<1<<n;j++) if(j&(1<<i)) {
+//高维前缀和
+for(int i=0;i<n;i++) //依次枚举每个维度
+{
+    for(int j=0;j<1<<n;j++) if(j&(1<<i)) //求每个维度的前缀和
+    {
         sum[j]+=sum[j^(1<<i)];
     }
 }//解决子集和
