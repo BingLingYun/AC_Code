@@ -1044,12 +1044,6 @@ i64 get(i64 x,i64 y,i64 m)
 }
 ```
 
-### 卡特兰数
-
-![image-20250218172145779](C:\Users\GLH\AppData\Roaming\Typora\typora-user-images\image-20250218172145779.png)
-
-![image-20250218172219076](C:\Users\GLH\AppData\Roaming\Typora\typora-user-images\image-20250218172219076.png)
-
 ### 矩阵快速幂
 
 ```c++
@@ -1151,8 +1145,6 @@ struct Combi{
 
 ### Lucas定理
 
-![image-20240428145833213](C:\Users\GLH\AppData\Roaming\Typora\typora-user-images\image-20240428145833213.png)
-
 ```c++
 int n,m,p;cin>>n>>m>>p;
 vector<i64>fac(p+1);fac[0]=1;
@@ -1213,7 +1205,7 @@ void getPrime(int n)
 
 ------
 
-<img src="C:\Users\GLH\AppData\Roaming\Typora\typora-user-images\image-20250429185132818.png" alt="image-20250429185132818" style="zoom: 50%;" /><img src="C:\Users\GLH\AppData\Roaming\Typora\typora-user-images\image-20250429191218340.png" alt="image-20250429191218340" style="zoom:50%;" />
+
 
 ```c++
 i64 exgcd(i64 a,i64 b,i64 &x,i64 &y)//扩展欧几里得算法
@@ -2021,11 +2013,7 @@ void erase(int x)
 
 ------
 
-![image-20250503003959084](C:\Users\GLH\AppData\Roaming\Typora\typora-user-images\image-20250503003959084.png)
-
-
-
-O($n$)复杂度利用单调栈
+O(n)复杂度利用单调栈
 
 ```c++
 //小根
@@ -2716,7 +2704,7 @@ for(int i=1;i<=n;i++)
 
 #### Bellman-Ford 算法
 
-Bellman-Ford 算法是一种基于松弛（relax）操作的最短路算法，
+Bellman-Ford 算法是一种基于松弛操作的最短路算法，
 
 可以求出有负权的图的最短路，并可以对最短路不存在的情况进行判断。
 
@@ -2788,9 +2776,9 @@ auto spfa = [&] (int s)
 
 一种求解 **非负权图** 上单源最短路径的算法
 
-在稀疏图中![m = O(n)](data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7)，[m = O(n)]，使用二叉堆实现的 Dijkstra 算法较 Bellman-Ford 算法具有较大的效率优势；
+在稀疏图中使用二叉堆实现的 Dijkstra 算法较 Bellman-Ford 算法具有较大的效率优势；
 
-而在稠密图中![m = O(n^2)](data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7)，m = O(n^2)，这时候使用暴力做法较二叉堆实现更优。
+而在稠密图中使用暴力做法较二叉堆实现更优。
 
 ```c++
 struct node {
@@ -2960,15 +2948,15 @@ function<void(int,int)> dfs = [&] (int u,int fa)
     }
 };dfs(1,0);
 
-vector<vector<pii>>f(cnt+1,vector<pii>(31));
-for(int i=1;i<=cnt;i++)
+vector<vector<pii>>f(tim+1,vector<pii>(31));
+for(int i=1;i<=tim;i++)
 {
     f[i][0]={dep[a[i]],a[i]};
 }
-int len=(int)(log(cnt)/log(2));
+int len=(int)(log(tim)/log(2));
 for(int j=1;j<=len;j++)
 {
-    for(int i=1;i<=cnt-(1<<j)+1;i++)
+    for(int i=1;i<=tim-(1<<j)+1;i++)
     {
         f[i][j]=min(f[i][j-1],f[i+(1<<(j-1))][j-1]);
     }
@@ -3421,8 +3409,6 @@ auto kmp = [&] (string t)
 
 ------
 
-![image-20240920141341707](C:\Users\GLH\AppData\Roaming\Typora\typora-user-images\image-20240920141341707.png)
-
 倍增排序时间复杂度为O($\ nlog^2 n$）
 
 ```c++
@@ -3451,8 +3437,6 @@ for (int w = 1; w < n; w <<= 1)
 }
 if(n==1) rk[1]=1;
 ```
-
-![image-20250902091645163](C:\Users\GLH\AppData\Roaming\Typora\typora-user-images\image-20250902091645163.png)
 
 O(n)求height数组
 
