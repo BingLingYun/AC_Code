@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Lihg模板
 
 [TOC]
@@ -3681,4 +3682,6 @@ double LineDis(const Point& P1, const Point& P2, const Point& Q1, const Point& Q
     }
 }
 ```
+=======
+>>>>>>> c23c1f964160e878d7701b8016d6f25687e5cc18
 
